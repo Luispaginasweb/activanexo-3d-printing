@@ -1,0 +1,7 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html { scroll-behavior: smooth; background: #000; }
+body { margin: 0; min-width: 320px; background: #000; }
+* { box-sizing: border-box; }
