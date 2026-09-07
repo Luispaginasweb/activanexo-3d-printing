@@ -391,7 +391,7 @@ const CinematicHero = () => {
           <Sparkles className="w-4 h-4 text-blue-400" /> Tecno-Impresión 3D de Alta Precisión
         </div>
 
-        <h1 className="font-anton text-5xl sm:text-6xl md:text-8xl lg:text-[7.25rem] text-white tracking-tight leading-[0.92] mb-7 drop-shadow-2xl">
+        <h1 className="font-anton text-4xl sm:text-5xl md:text-7xl lg:text-[6rem] text-white tracking-tight leading-[0.92] mb-7 drop-shadow-2xl">
           DA FORMA A <span className="bg-gradient-to-r from-blue-400 via-purple-400 to-indigo-300 bg-clip-text text-transparent">TUS IDEAS</span>
         </h1>
 
@@ -430,7 +430,7 @@ const CinematicHero = () => {
 const ProcessSection = () => {
   const sectionRef = useRef(null);
   const [activeIndex, setActiveIndex] = useState(0);
-  const [stageProgress, setStageProgress] = useState(0);
+  const [sectionProgress, setSectionProgress] = useState(0);
 
   const stages = [
     {
@@ -473,12 +473,13 @@ const ProcessSection = () => {
 
   useEffect(() => {
     const update = () => {
-      if (!sectionRef.current) return;
-      const rect = sectionRef.current.getBoundingClientRect();
-      const travel = Math.max(1, rect.height - window.innerHeight);
-      const progress = Math.min(1, Math.max(0, -rect.top / travel));
-      setStageProgress(progress);
-      setActiveIndex(Math.min(stages.length - 1, Math.floor(progress * stages.length)));
+      const section = sectionRef.current;
+      if (!section) return;
+      const rect = section.getBoundingClientRect();
+      const travel = Math.max(1, section.offsetHeight - window.innerHeight);
+      const raw = Math.min(1, Math.max(0, -rect.top / travel));
+      setSectionProgress(raw);
+      setActiveIndex(Math.min(stages.length - 1, Math.floor(raw * stages.length)));
     };
     update();
     window.addEventListener('scroll', update, { passive: true });
@@ -491,52 +492,77 @@ const ProcessSection = () => {
 
   const active = stages[activeIndex];
   const ActiveIcon = active.icon;
+  const localProgress = Math.min(1, Math.max(0, sectionProgress * stages.length - activeIndex));
 
   return (
-    <section ref={sectionRef} id="proceso" className="relative h-[142vh] md:h-[148vh] bg-[#050508] text-white">
-      <div className="sticky top-0 h-[100svh] flex items-center overflow-hidden px-6 py-16 md:py-14">
+    <section ref={sectionRef} id="proceso" className="relative h-[300vh] md:h-[320vh] bg-[#050508] text-white">
+      <div className="sticky top-0 h-[100svh] overflow-hidden px-5 md:px-8 pt-28 pb-5 md:pt-28 md:pb-6 flex items-center">
         <div className="max-w-7xl mx-auto w-full">
-          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-5 border-b border-white/10 pb-6 mb-8 md:mb-10">
+          <div className="flex items-end justify-between gap-6 border-b border-white/10 pb-4 mb-5">
             <div>
-              <span className="text-xs font-mono text-blue-400 tracking-[0.22em] uppercase block mb-2">Transformación progresiva</span>
-              <h2 className="font-anton text-4xl md:text-6xl xl:text-7xl tracking-tight leading-[0.94]">DE UNA IDEA A UNA PIEZA REAL</h2>
+              <span className="text-[10px] md:text-xs font-mono text-blue-400 tracking-[0.22em] uppercase block mb-1.5">Transformación progresiva</span>
+              <h2 className="font-anton text-3xl md:text-5xl xl:text-6xl tracking-tight leading-[0.94]">DE UNA IDEA A UNA PIEZA REAL</h2>
             </div>
-            <div className="md:w-64">
-              <div className="flex justify-between text-[10px] font-mono text-zinc-500 mb-2"><span>PROGRESO</span><span>{Math.round(stageProgress * 100)}%</span></div>
-              <div className="h-1.5 bg-white/10 rounded-full overflow-hidden"><div className="h-full bg-gradient-to-r from-blue-500 via-violet-500 to-emerald-400 transition-[width] duration-150" style={{ width: `${stageProgress * 100}%` }} /></div>
-            </div>
-          </div>
-
-          <div className="relative h-[58vh] min-h-[430px] max-h-[590px] rounded-[2rem] border border-white/10 bg-white/[0.025] overflow-hidden shadow-2xl">
-            <div className="absolute inset-0 opacity-25 transition-colors duration-700" style={{ background: `radial-gradient(circle at 72% 45%, ${active.glow}55, transparent 42%)` }} />
-            <div className="relative z-10 grid md:grid-cols-[1.25fr_.75fr] gap-8 h-full items-center p-7 md:p-12">
-              <div key={`text-${activeIndex}`} className="animate-stageIn">
-                <div className="flex flex-wrap items-center gap-3 mb-5">
-                  <span className="font-anton text-6xl md:text-7xl text-white/15 leading-none">{active.step}</span>
-                  <span className={`px-4 py-2 rounded-full bg-white/5 border border-white/10 text-xs font-mono ${active.color}`}>{active.subtitle}</span>
-                </div>
-                <h3 className="font-anton text-5xl md:text-7xl tracking-tight leading-none mb-4">{active.title}</h3>
-                <p className="text-zinc-300 text-lg md:text-xl leading-relaxed max-w-2xl">{active.desc}</p>
-              </div>
-
-              <div key={`visual-${activeIndex}`} className="relative flex justify-center items-center animate-stageIn">
-                <div className="absolute w-64 h-64 md:w-80 md:h-80 rounded-full border border-dashed border-white/15 animate-spin-slow" />
-                <div className="absolute w-52 h-52 md:w-64 md:h-64 rounded-full border border-white/10" />
-                <div className="relative w-44 h-44 md:w-56 md:h-56 rounded-[2rem] bg-black/75 border border-white/10 backdrop-blur-xl shadow-2xl flex flex-col items-center justify-center">
-                  <ActiveIcon className={`w-16 h-16 md:w-20 md:h-20 ${active.color} mb-4`} />
-                  <span className="font-mono text-[11px] tracking-[0.3em] text-zinc-500">ETAPA {active.step}</span>
-                </div>
-              </div>
+            <div className="hidden md:block w-56">
+              <div className="flex justify-between text-[10px] font-mono text-zinc-500 mb-2"><span>RECORRIDO</span><span>{Math.round(sectionProgress * 100)}%</span></div>
+              <div className="h-1.5 bg-white/10 rounded-full overflow-hidden"><div className="h-full bg-gradient-to-r from-blue-500 via-violet-500 to-emerald-400" style={{ width: `${sectionProgress * 100}%` }} /></div>
             </div>
           </div>
 
-          <div className="grid grid-cols-4 gap-2 md:gap-4 mt-7">
-            {stages.map((stage, idx) => (
-              <button key={stage.step} onClick={() => setActiveIndex(idx)} className={`text-left transition-opacity ${idx === activeIndex ? 'opacity-100' : 'opacity-35 hover:opacity-70'}`}>
-                <div className="flex items-center gap-2 mb-2"><span className="font-mono text-xs text-blue-400">{stage.step}</span><span className="font-anton text-xs sm:text-sm md:text-base truncate">{stage.title}</span></div>
-                <div className={`h-1 rounded-full ${idx === activeIndex ? 'bg-blue-500' : 'bg-white/10'}`} />
-              </button>
-            ))}
+          <div className="relative h-[57vh] min-h-[390px] max-h-[545px] rounded-[2rem] border border-white/10 bg-white/[0.025] overflow-hidden shadow-2xl">
+            <div className="absolute inset-0 transition-all duration-700" style={{ background: `radial-gradient(circle at 74% 48%, ${active.glow}35, transparent 42%)` }} />
+            <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+
+            {stages.map((stage, idx) => {
+              const Icon = stage.icon;
+              const isActive = idx === activeIndex;
+              const isPast = idx < activeIndex;
+              return (
+                <div
+                  key={stage.step}
+                  className="absolute inset-0 grid md:grid-cols-[1.2fr_.8fr] gap-8 items-center p-7 md:p-10 lg:p-12 transition-all duration-700 ease-[cubic-bezier(.22,1,.36,1)]"
+                  style={{
+                    opacity: isActive ? 1 : 0,
+                    transform: isActive ? `translate3d(0, ${(0.5-localProgress)*8}px, 0) scale(1)` : isPast ? 'translate3d(-7%,0,0) scale(.94)' : 'translate3d(7%,0,0) scale(1.04)',
+                    filter: isActive ? 'blur(0px)' : 'blur(10px)',
+                    pointerEvents: isActive ? 'auto' : 'none',
+                  }}
+                >
+                  <div>
+                    <div className="flex flex-wrap items-center gap-3 mb-4">
+                      <span className="font-anton text-5xl md:text-7xl text-white/15 leading-none">{stage.step}</span>
+                      <span className={`px-4 py-2 rounded-full bg-white/5 border border-white/10 text-xs font-mono ${stage.color}`}>{stage.subtitle}</span>
+                    </div>
+                    <h3 className="font-anton text-4xl md:text-6xl xl:text-7xl tracking-tight leading-none mb-4">{stage.title}</h3>
+                    <p className="text-zinc-300 text-base md:text-xl leading-relaxed max-w-2xl">{stage.desc}</p>
+                  </div>
+
+                  <div className="relative flex justify-center items-center">
+                    <div className="absolute w-56 h-56 md:w-72 md:h-72 rounded-full border border-dashed border-white/15 animate-spin-slow" />
+                    <div className="absolute w-44 h-44 md:w-56 md:h-56 rounded-full border border-white/10" />
+                    <div className="relative w-40 h-40 md:w-52 md:h-52 rounded-[2rem] bg-black/75 border border-white/10 backdrop-blur-xl shadow-2xl flex flex-col items-center justify-center">
+                      <Icon className={`w-14 h-14 md:w-20 md:h-20 ${stage.color} mb-4`} />
+                      <span className="font-mono text-[10px] tracking-[0.3em] text-zinc-500">ETAPA {stage.step}</span>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          <div className="grid grid-cols-4 gap-2 md:gap-4 mt-5">
+            {stages.map((stage, idx) => {
+              const completed = idx < activeIndex;
+              const current = idx === activeIndex;
+              return (
+                <div key={stage.step} className={`transition-opacity ${current ? 'opacity-100' : completed ? 'opacity-55' : 'opacity-28'}`}>
+                  <div className="flex items-center gap-2 mb-1.5"><span className="font-mono text-[10px] md:text-xs text-blue-400">{stage.step}</span><span className="font-anton text-[10px] sm:text-xs md:text-sm truncate">{stage.title}</span></div>
+                  <div className="h-1 rounded-full bg-white/10 overflow-hidden">
+                    <div className={`h-full ${completed ? 'w-full bg-blue-500/70' : current ? 'bg-blue-500' : 'w-0'}`} style={current ? { width: `${Math.max(12, localProgress * 100)}%` } : undefined} />
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
       </div>
@@ -707,6 +733,7 @@ const FilamentCarousel = () => {
 const PrintPossibilities = () => {
   const sectionRef = useRef(null);
   const [activeIndex, setActiveIndex] = useState(0);
+  const [sectionProgress, setSectionProgress] = useState(0);
 
   const categories = [
     { title: 'Figuras', label: 'Figuras y coleccionables', img: assets.categories.figures },
@@ -721,59 +748,84 @@ const PrintPossibilities = () => {
 
   useEffect(() => {
     const update = () => {
-      if (!sectionRef.current) return;
-      const rect = sectionRef.current.getBoundingClientRect();
-      const travel = Math.max(1, rect.height - window.innerHeight);
-      const progress = Math.min(1, Math.max(0, -rect.top / travel));
-      setActiveIndex(Math.min(categories.length - 1, Math.floor(progress * categories.length)));
+      const section = sectionRef.current;
+      if (!section) return;
+      const rect = section.getBoundingClientRect();
+      const travel = Math.max(1, section.offsetHeight - window.innerHeight);
+      const raw = Math.min(1, Math.max(0, -rect.top / travel));
+      setSectionProgress(raw);
+      setActiveIndex(Math.min(categories.length - 1, Math.floor(raw * categories.length)));
     };
     update();
     window.addEventListener('scroll', update, { passive: true });
-    return () => window.removeEventListener('scroll', update);
+    window.addEventListener('resize', update);
+    return () => {
+      window.removeEventListener('scroll', update);
+      window.removeEventListener('resize', update);
+    };
   }, []);
 
   const active = categories[activeIndex];
+  const localProgress = Math.min(1, Math.max(0, sectionProgress * categories.length - activeIndex));
 
   return (
-    <section ref={sectionRef} id="categorias" className="relative h-[165vh] md:h-[172vh] bg-black text-white">
-      <div className="sticky top-0 h-[100svh] flex items-center overflow-hidden px-6 py-14 md:py-12">
+    <section ref={sectionRef} id="categorias" className="relative h-[390vh] md:h-[420vh] bg-black text-white">
+      <div className="sticky top-0 h-[100svh] overflow-hidden px-5 md:px-8 pt-28 pb-6 flex items-center">
         <div className="max-w-7xl mx-auto w-full">
-          <div className="grid lg:grid-cols-[.72fr_1.28fr] gap-8 lg:gap-12 items-center">
+          <div className="grid lg:grid-cols-[.70fr_1.30fr] gap-7 lg:gap-10 items-center">
             <div className="order-2 lg:order-1">
-              <span className="text-xs font-mono text-purple-400 tracking-[0.22em] uppercase block mb-3">Posibilidades casi ilimitadas</span>
-              <h2 className="font-anton text-4xl md:text-6xl xl:text-7xl leading-[.92] mb-4">¿QUÉ PODEMOS IMPRIMIR?</h2>
-              <p className="text-zinc-400 text-base md:text-lg max-w-lg mb-8">Explora diferentes tipos de proyectos. Mientras avanzas, cada categoría toma el protagonismo.</p>
+              <span className="text-[10px] md:text-xs font-mono text-purple-400 tracking-[0.22em] uppercase block mb-2">Posibilidades casi ilimitadas</span>
+              <h2 className="font-anton text-3xl md:text-5xl xl:text-6xl leading-[.92] mb-3">¿QUÉ PODEMOS IMPRIMIR?</h2>
+              <p className="text-zinc-400 text-sm md:text-base max-w-lg mb-5">El recorrido queda fijo mientras cada categoría toma el protagonismo.</p>
 
-              <div className="hidden lg:flex flex-col gap-2">
-                {categories.map((cat, idx) => (
-                  <button key={cat.title} onClick={() => setActiveIndex(idx)} className={`group flex items-center gap-4 py-2.5 border-b text-left transition-all ${idx === activeIndex ? 'border-blue-500 text-white' : 'border-white/10 text-zinc-600 hover:text-zinc-300'}`}>
-                    <span className="font-mono text-xs text-blue-400">0{idx + 1}</span>
-                    <span className={`font-anton text-2xl xl:text-3xl transition-transform ${idx === activeIndex ? 'translate-x-2' : ''}`}>{cat.title}</span>
-                  </button>
-                ))}
+              <div className="hidden lg:flex flex-col">
+                {categories.map((cat, idx) => {
+                  const current = idx === activeIndex;
+                  const completed = idx < activeIndex;
+                  return (
+                    <div key={cat.title} className={`relative flex items-center gap-4 py-2.5 border-b transition-all duration-500 ${current ? 'border-blue-500 text-white' : 'border-white/10 text-zinc-600'}`}>
+                      <span className="font-mono text-[11px] text-blue-400">0{idx + 1}</span>
+                      <span className={`font-anton text-xl xl:text-2xl transition-all duration-500 ${current ? 'translate-x-2 scale-[1.04]' : ''}`}>{cat.title}</span>
+                      {current && <span className="ml-auto text-[10px] font-mono text-zinc-500">{Math.round(localProgress * 100)}%</span>}
+                      <span className={`absolute left-0 bottom-[-1px] h-[2px] bg-blue-500 transition-all ${completed ? 'w-full opacity-35' : current ? '' : 'w-0'}`} style={current ? { width: `${Math.max(8, localProgress * 100)}%` } : undefined} />
+                    </div>
+                  );
+                })}
               </div>
             </div>
 
             <div className="order-1 lg:order-2">
-              <div className="relative h-[68vh] min-h-[500px] max-h-[680px] rounded-[2rem] overflow-hidden border border-white/10 shadow-2xl bg-zinc-950">
-                {categories.map((cat, idx) => (
-                  <div key={cat.title} className="absolute inset-0 transition-all duration-700 ease-out" style={{ opacity: idx === activeIndex ? 1 : 0, transform: idx === activeIndex ? 'scale(1)' : idx < activeIndex ? 'scale(.96) translateX(-3%)' : 'scale(1.04) translateX(3%)', filter: idx === activeIndex ? 'blur(0px)' : 'blur(8px)' }}>
-                    <ImageWithFallback src={cat.img} alt={cat.title} className="w-full h-full object-cover" />
-                  </div>
-                ))}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/5 to-black/15" />
-                <div className="absolute left-6 right-6 bottom-6 md:left-9 md:right-9 md:bottom-9 flex items-end justify-between gap-5">
+              <div className="relative h-[64vh] min-h-[450px] max-h-[620px] rounded-[2rem] overflow-hidden border border-white/10 shadow-2xl bg-zinc-950">
+                {categories.map((cat, idx) => {
+                  const current = idx === activeIndex;
+                  const past = idx < activeIndex;
+                  return (
+                    <div
+                      key={cat.title}
+                      className="absolute inset-0 transition-all duration-700 ease-[cubic-bezier(.22,1,.36,1)]"
+                      style={{
+                        opacity: current ? 1 : 0,
+                        transform: current ? `translate3d(0, ${(0.5-localProgress)*12}px, 0) scale(1)` : past ? 'translate3d(0,-7%,0) scale(.965)' : 'translate3d(0,7%,0) scale(1.035)',
+                        filter: current ? 'blur(0px)' : 'blur(10px)',
+                      }}
+                    >
+                      <ImageWithFallback src={cat.img} alt={cat.title} className="w-full h-full object-cover" />
+                    </div>
+                  );
+                })}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-transparent to-black/10" />
+                <div className="absolute left-6 right-6 bottom-6 md:left-9 md:right-9 md:bottom-8 flex items-end justify-between gap-5">
                   <div key={`caption-${activeIndex}`} className="animate-stageIn">
                     <span className="font-mono text-xs text-blue-400 tracking-widest">0{activeIndex + 1} / 08</span>
                     <h3 className="font-anton text-4xl md:text-6xl mt-1">{active.title}</h3>
                     <p className="text-zinc-300 text-sm md:text-base mt-1">{active.label}</p>
                   </div>
-                  <div className="hidden sm:flex gap-1.5">{categories.map((_, idx) => <span key={idx} className={`h-1 rounded-full transition-all ${idx === activeIndex ? 'w-8 bg-blue-500' : 'w-3 bg-white/20'}`} />)}</div>
+                  <div className="hidden sm:flex gap-1.5">{categories.map((_, idx) => <span key={idx} className={`h-1 rounded-full transition-all duration-500 ${idx === activeIndex ? 'w-8 bg-blue-500' : idx < activeIndex ? 'w-4 bg-blue-500/35' : 'w-3 bg-white/20'}`} />)}</div>
                 </div>
               </div>
 
-              <div className="lg:hidden flex gap-2 overflow-x-auto pt-5 pb-1 scrollbar-none">
-                {categories.map((cat, idx) => <button key={cat.title} onClick={() => setActiveIndex(idx)} className={`flex-none px-4 py-2 rounded-full border text-sm ${idx === activeIndex ? 'bg-blue-600 border-blue-500 text-white' : 'bg-white/5 border-white/10 text-zinc-400'}`}>{cat.title}</button>)}
+              <div className="lg:hidden flex gap-2 overflow-x-auto pt-4 pb-1 scrollbar-none">
+                {categories.map((cat, idx) => <span key={cat.title} className={`flex-none px-4 py-2 rounded-full border text-sm ${idx === activeIndex ? 'bg-blue-600 border-blue-500 text-white' : 'bg-white/5 border-white/10 text-zinc-500'}`}>{cat.title}</span>)}
               </div>
             </div>
           </div>
