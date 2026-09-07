@@ -391,7 +391,7 @@ const CinematicHero = () => {
           <Sparkles className="w-4 h-4 text-blue-400" /> Tecno-Impresión 3D de Alta Precisión
         </div>
 
-        <h1 className="font-anton text-6xl sm:text-7xl md:text-9xl text-white tracking-tight leading-none mb-8 drop-shadow-2xl">
+        <h1 className="font-anton text-5xl sm:text-6xl md:text-8xl lg:text-[7.25rem] text-white tracking-tight leading-[0.92] mb-7 drop-shadow-2xl">
           DA FORMA A <span className="bg-gradient-to-r from-blue-400 via-purple-400 to-indigo-300 bg-clip-text text-transparent">TUS IDEAS</span>
         </h1>
 
@@ -493,13 +493,13 @@ const ProcessSection = () => {
   const ActiveIcon = active.icon;
 
   return (
-    <section ref={sectionRef} id="proceso" className="relative h-[155vh] md:h-[165vh] bg-[#050508] text-white">
-      <div className="sticky top-0 min-h-[100svh] flex items-center overflow-hidden px-6 py-24 md:py-20">
+    <section ref={sectionRef} id="proceso" className="relative h-[142vh] md:h-[148vh] bg-[#050508] text-white">
+      <div className="sticky top-0 h-[100svh] flex items-center overflow-hidden px-6 py-16 md:py-14">
         <div className="max-w-7xl mx-auto w-full">
           <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-5 border-b border-white/10 pb-6 mb-8 md:mb-10">
             <div>
               <span className="text-xs font-mono text-blue-400 tracking-[0.22em] uppercase block mb-2">Transformación progresiva</span>
-              <h2 className="font-anton text-5xl md:text-7xl xl:text-8xl tracking-tight leading-[0.94]">DE UNA IDEA A UNA PIEZA REAL</h2>
+              <h2 className="font-anton text-4xl md:text-6xl xl:text-7xl tracking-tight leading-[0.94]">DE UNA IDEA A UNA PIEZA REAL</h2>
             </div>
             <div className="md:w-64">
               <div className="flex justify-between text-[10px] font-mono text-zinc-500 mb-2"><span>PROGRESO</span><span>{Math.round(stageProgress * 100)}%</span></div>
@@ -507,15 +507,15 @@ const ProcessSection = () => {
             </div>
           </div>
 
-          <div className="relative min-h-[430px] md:min-h-[470px] rounded-[2rem] border border-white/10 bg-white/[0.025] overflow-hidden shadow-2xl">
+          <div className="relative h-[58vh] min-h-[430px] max-h-[590px] rounded-[2rem] border border-white/10 bg-white/[0.025] overflow-hidden shadow-2xl">
             <div className="absolute inset-0 opacity-25 transition-colors duration-700" style={{ background: `radial-gradient(circle at 72% 45%, ${active.glow}55, transparent 42%)` }} />
-            <div className="relative z-10 grid md:grid-cols-[1.25fr_.75fr] gap-8 h-full min-h-[430px] md:min-h-[470px] items-center p-8 md:p-14">
+            <div className="relative z-10 grid md:grid-cols-[1.25fr_.75fr] gap-8 h-full items-center p-7 md:p-12">
               <div key={`text-${activeIndex}`} className="animate-stageIn">
                 <div className="flex flex-wrap items-center gap-3 mb-5">
                   <span className="font-anton text-6xl md:text-7xl text-white/15 leading-none">{active.step}</span>
                   <span className={`px-4 py-2 rounded-full bg-white/5 border border-white/10 text-xs font-mono ${active.color}`}>{active.subtitle}</span>
                 </div>
-                <h3 className="font-anton text-6xl md:text-8xl tracking-tight leading-none mb-5">{active.title}</h3>
+                <h3 className="font-anton text-5xl md:text-7xl tracking-tight leading-none mb-4">{active.title}</h3>
                 <p className="text-zinc-300 text-lg md:text-xl leading-relaxed max-w-2xl">{active.desc}</p>
               </div>
 
@@ -735,18 +735,18 @@ const PrintPossibilities = () => {
   const active = categories[activeIndex];
 
   return (
-    <section ref={sectionRef} id="categorias" className="relative h-[185vh] md:h-[195vh] bg-black text-white">
-      <div className="sticky top-0 min-h-[100svh] flex items-center overflow-hidden px-6 py-24 md:py-20">
+    <section ref={sectionRef} id="categorias" className="relative h-[165vh] md:h-[172vh] bg-black text-white">
+      <div className="sticky top-0 h-[100svh] flex items-center overflow-hidden px-6 py-14 md:py-12">
         <div className="max-w-7xl mx-auto w-full">
           <div className="grid lg:grid-cols-[.72fr_1.28fr] gap-8 lg:gap-12 items-center">
             <div className="order-2 lg:order-1">
               <span className="text-xs font-mono text-purple-400 tracking-[0.22em] uppercase block mb-3">Posibilidades casi ilimitadas</span>
-              <h2 className="font-anton text-5xl md:text-7xl xl:text-8xl leading-[.92] mb-5">¿QUÉ PODEMOS IMPRIMIR?</h2>
+              <h2 className="font-anton text-4xl md:text-6xl xl:text-7xl leading-[.92] mb-4">¿QUÉ PODEMOS IMPRIMIR?</h2>
               <p className="text-zinc-400 text-base md:text-lg max-w-lg mb-8">Explora diferentes tipos de proyectos. Mientras avanzas, cada categoría toma el protagonismo.</p>
 
               <div className="hidden lg:flex flex-col gap-2">
                 {categories.map((cat, idx) => (
-                  <button key={cat.title} onClick={() => setActiveIndex(idx)} className={`group flex items-center gap-4 py-3 border-b text-left transition-all ${idx === activeIndex ? 'border-blue-500 text-white' : 'border-white/10 text-zinc-600 hover:text-zinc-300'}`}>
+                  <button key={cat.title} onClick={() => setActiveIndex(idx)} className={`group flex items-center gap-4 py-2.5 border-b text-left transition-all ${idx === activeIndex ? 'border-blue-500 text-white' : 'border-white/10 text-zinc-600 hover:text-zinc-300'}`}>
                     <span className="font-mono text-xs text-blue-400">0{idx + 1}</span>
                     <span className={`font-anton text-2xl xl:text-3xl transition-transform ${idx === activeIndex ? 'translate-x-2' : ''}`}>{cat.title}</span>
                   </button>
@@ -755,7 +755,7 @@ const PrintPossibilities = () => {
             </div>
 
             <div className="order-1 lg:order-2">
-              <div className="relative aspect-[16/10] rounded-[2rem] overflow-hidden border border-white/10 shadow-2xl bg-zinc-950">
+              <div className="relative h-[68vh] min-h-[500px] max-h-[680px] rounded-[2rem] overflow-hidden border border-white/10 shadow-2xl bg-zinc-950">
                 {categories.map((cat, idx) => (
                   <div key={cat.title} className="absolute inset-0 transition-all duration-700 ease-out" style={{ opacity: idx === activeIndex ? 1 : 0, transform: idx === activeIndex ? 'scale(1)' : idx < activeIndex ? 'scale(.96) translateX(-3%)' : 'scale(1.04) translateX(3%)', filter: idx === activeIndex ? 'blur(0px)' : 'blur(8px)' }}>
                     <ImageWithFallback src={cat.img} alt={cat.title} className="w-full h-full object-cover" />
@@ -877,13 +877,13 @@ const FinalCTA = () => {
         alt="Taller de impresión 3D"
         className="absolute inset-0 w-full h-full object-cover"
       />
-      <div className="absolute inset-0 bg-gradient-to-r from-black/78 via-black/35 to-black/45" />
-      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/25" />
+      <div className="absolute inset-0 bg-gradient-to-r from-black/58 via-black/24 to-black/32" />
+      <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-transparent to-black/18" />
 
       <div className="relative z-10 max-w-7xl mx-auto w-full">
         <div className="max-w-3xl rounded-[2rem] bg-black/30 border border-white/10 backdrop-blur-sm p-7 md:p-10">
           <span className="text-xs font-mono text-blue-300 tracking-[0.22em] uppercase block mb-4">Tu siguiente proyecto puede empezar aquí</span>
-          <h2 className="font-anton text-5xl sm:text-6xl md:text-7xl xl:text-8xl tracking-tight leading-[0.92] mb-5">TU PROYECTO<br/><span className="bg-gradient-to-r from-blue-400 via-violet-400 to-emerald-300 bg-clip-text text-transparent">A UN PASO</span></h2>
+          <h2 className="font-anton text-4xl sm:text-5xl md:text-6xl xl:text-7xl tracking-tight leading-[0.92] mb-5">TU PROYECTO<br/><span className="bg-gradient-to-r from-blue-400 via-violet-400 to-emerald-300 bg-clip-text text-transparent">A UN PASO</span></h2>
           <p className="font-inter text-lg md:text-xl text-zinc-200 max-w-2xl mb-8 font-light leading-relaxed">Cuéntanos qué necesitas y recibe una cotización personalizada para convertir tu idea en una pieza real.</p>
           <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer">
             <Button variant="primary" icon={ArrowRight} className="!px-8 md:!px-10 !py-4 !text-base !bg-emerald-500 hover:!bg-white hover:!text-black shadow-xl shadow-emerald-500/20">COTIZAR POR WHATSAPP</Button>
