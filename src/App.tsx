@@ -44,7 +44,7 @@ const assets = {
     sizes: '/assets/categoria-tamanos.png',
   },
   workShowcase: '/assets/trabajos-realizados.png',
-  finalCta: '/assets/cta-final.png',
+  finalCta: '/assets/final-cta-workshop.png',
 };
 
 // Componente inteligente para imágenes con fallback por si falla la carga
@@ -383,8 +383,8 @@ const CinematicHero = () => {
         style={{ opacity: videoLoaded ? videoOpacity : 0 }}
       />
 
-      <div className="absolute inset-0 bg-gradient-to-t from-[#050508] via-black/60 to-black/80"></div>
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-blue-900/20 via-transparent to-black/80"></div>
+      <div className="absolute inset-0 bg-gradient-to-t from-[#050508]/85 via-black/25 to-black/35"></div>
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-blue-900/10 via-transparent to-black/35"></div>
 
       <div className="relative z-10 text-center px-6 max-w-5xl mx-auto mt-12">
         <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-semibold tracking-widest uppercase mb-8 backdrop-blur-md animate-pulse">
@@ -428,192 +428,117 @@ const CinematicHero = () => {
 // ==========================================
 
 const ProcessSection = () => {
-  const containerRef = useRef(null);
-  const [progress, setProgress] = useState(0);
+  const sectionRef = useRef(null);
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [stageProgress, setStageProgress] = useState(0);
 
-  useEffect(() => {
-    const handleScroll = () => {
-      if (!containerRef.current) return;
-      const rect = containerRef.current.getBoundingClientRect();
-      const totalScrollable = rect.height - window.innerHeight;
-      if (totalScrollable <= 0) return;
-      const currentScroll = -rect.top;
-      const pct = Math.min(Math.max(0, currentScroll / totalScrollable), 1);
-      setProgress(pct);
-    };
-
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    handleScroll();
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
-  // Fases narrativas continuas
   const stages = [
     {
-      id: 'idea',
       step: '01',
       title: 'IDEA',
       subtitle: 'Boceto & Concepto',
-      desc: 'Analizamos tus requerimientos funcionales, dibujos o ideas iniciales para darles viabilidad.',
-      gradient: 'from-blue-600 via-cyan-500 to-indigo-600',
+      desc: 'Nos cuentas tu necesidad, dibujo o idea inicial. Revisamos viabilidad, uso y material recomendado.',
       icon: Sparkles,
       color: 'text-cyan-400',
+      glow: '#22d3ee',
     },
     {
-      id: 'model',
       step: '02',
       title: 'MODELO 3D',
-      subtitle: 'Modelado CAD & Geometría',
-      desc: 'Convertimos la idea en una estructura tridimensional precisa, optimizando espesores de pared y tolerancias.',
-      gradient: 'from-purple-600 via-indigo-500 to-blue-600',
+      subtitle: 'Diseño & Geometría',
+      desc: 'Convertimos la idea en un modelo tridimensional preciso y preparado para fabricación.',
       icon: Layers,
-      color: 'text-purple-400',
+      color: 'text-violet-400',
+      glow: '#8b5cf6',
     },
     {
-      id: 'print',
       step: '03',
       title: 'IMPRESIÓN',
-      subtitle: 'Fabricación Capa a Capa',
-      desc: 'Extrusión milimétrica de alta fidelidad. El filamento cobra vida en el volumen de impresión.',
-      gradient: 'from-blue-500 via-purple-600 to-pink-500',
+      subtitle: 'Capa a Capa',
+      desc: 'La pieza toma forma mediante impresión controlada, con parámetros ajustados al material y al uso final.',
       icon: Cpu,
       color: 'text-blue-400',
+      glow: '#3b82f6',
     },
     {
-      id: 'finished',
       step: '04',
       title: 'PIEZA TERMINADA',
       subtitle: 'Acabado & Entrega',
-      desc: 'Limpieza de soportes, verificación dimensional y entrega final de una pieza lista para su uso real.',
-      gradient: 'from-emerald-500 via-teal-400 to-blue-500',
+      desc: 'Retiramos soportes, verificamos el acabado y dejamos la pieza lista para utilizar o presentar.',
       icon: CheckCircle2,
       color: 'text-emerald-400',
+      glow: '#10b981',
     },
   ];
 
-  // Cálculo del estado activo según el progreso (0 a 1)
-  const activeStageIndex = Math.min(Math.floor(progress * stages.length), stages.length - 1);
-  const activeStage = stages[activeStageIndex];
+  useEffect(() => {
+    const update = () => {
+      if (!sectionRef.current) return;
+      const rect = sectionRef.current.getBoundingClientRect();
+      const travel = Math.max(1, rect.height - window.innerHeight);
+      const progress = Math.min(1, Math.max(0, -rect.top / travel));
+      setStageProgress(progress);
+      setActiveIndex(Math.min(stages.length - 1, Math.floor(progress * stages.length)));
+    };
+    update();
+    window.addEventListener('scroll', update, { passive: true });
+    window.addEventListener('resize', update);
+    return () => {
+      window.removeEventListener('scroll', update);
+      window.removeEventListener('resize', update);
+    };
+  }, []);
+
+  const active = stages[activeIndex];
+  const ActiveIcon = active.icon;
 
   return (
-    <section 
-      ref={containerRef}
-      id="proceso" 
-      className="relative h-[250vh] bg-[#050508] text-white"
-    >
-      {/* Vista Fija (Sticky) */}
-      <div className="sticky top-0 h-screen w-full flex flex-col justify-between p-6 md:p-12 overflow-hidden">
-        
-        {/* Encabezado Fijo */}
-        <div className="max-w-7xl mx-auto w-full flex justify-between items-end border-b border-white/10 pb-6 z-20">
-          <div>
-            <span className="text-xs font-mono text-blue-400 tracking-widest uppercase block mb-1">
-              Transformación Progresiva
-            </span>
-            <h2 className="font-anton text-4xl md:text-7xl tracking-tight text-white">
-              DE UNA IDEA A UNA PIEZA REAL
-            </h2>
-          </div>
-          <div className="hidden md:flex items-center gap-4">
-            <span className="font-mono text-xs text-zinc-400">Progreso del proceso</span>
-            <div className="w-36 h-1.5 bg-white/10 rounded-full overflow-hidden">
-              <div 
-                className="h-full bg-gradient-to-r from-blue-500 to-purple-500 transition-all duration-150"
-                style={{ width: `${progress * 100}%` }}
-              />
+    <section ref={sectionRef} id="proceso" className="relative h-[155vh] md:h-[165vh] bg-[#050508] text-white">
+      <div className="sticky top-0 min-h-[100svh] flex items-center overflow-hidden px-6 py-24 md:py-20">
+        <div className="max-w-7xl mx-auto w-full">
+          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-5 border-b border-white/10 pb-6 mb-8 md:mb-10">
+            <div>
+              <span className="text-xs font-mono text-blue-400 tracking-[0.22em] uppercase block mb-2">Transformación progresiva</span>
+              <h2 className="font-anton text-5xl md:text-7xl xl:text-8xl tracking-tight leading-[0.94]">DE UNA IDEA A UNA PIEZA REAL</h2>
+            </div>
+            <div className="md:w-64">
+              <div className="flex justify-between text-[10px] font-mono text-zinc-500 mb-2"><span>PROGRESO</span><span>{Math.round(stageProgress * 100)}%</span></div>
+              <div className="h-1.5 bg-white/10 rounded-full overflow-hidden"><div className="h-full bg-gradient-to-r from-blue-500 via-violet-500 to-emerald-400 transition-[width] duration-150" style={{ width: `${stageProgress * 100}%` }} /></div>
             </div>
           </div>
-        </div>
 
-        {/* Transformación Progresiva Visual */}
-        <div className="relative flex-1 max-w-7xl mx-auto w-full flex items-center justify-center my-6">
-          
-          {/* Fondo Dinámico con destello suave */}
-          <div 
-            className="absolute w-[500px] h-[500px] rounded-full blur-[140px] opacity-25 transition-all duration-700 pointer-events-none"
-            style={{
-              background: activeStageIndex === 0 ? '#0088ff' : activeStageIndex === 1 ? '#8b5cf6' : activeStageIndex === 2 ? '#ec4899' : '#10b981'
-            }}
-          />
-
-          {/* Renderizado de Transformación Progresiva (Sustituye a tarjetas estáticas) */}
-          <div className="relative w-full max-w-4xl h-80 md:h-96 rounded-3xl border border-white/10 liquid-glass flex items-center justify-center p-8 overflow-hidden shadow-2xl">
-            {stages.map((stg, idx) => {
-              const isActive = idx === activeStageIndex;
-              const isPast = idx < activeStageIndex;
-              const isFuture = idx > activeStageIndex;
-
-              const Icon = stg.icon;
-
-              return (
-                <div
-                  key={stg.id}
-                  className="absolute inset-0 p-8 md:p-12 flex flex-col md:flex-row items-center justify-between gap-8 transition-all duration-700 ease-out"
-                  style={{
-                    opacity: isActive ? 1 : 0,
-                    transform: isActive 
-                      ? 'scale(1) translate3d(0, 0, 0)' 
-                      : isPast 
-                      ? 'scale(0.85) translate3d(-80px, 0, 0)' 
-                      : 'scale(1.15) translate3d(80px, 0, 0)',
-                    filter: isActive ? 'blur(0px)' : 'blur(10px)',
-                    pointerEvents: isActive ? 'auto' : 'none',
-                  }}
-                >
-                  {/* Lado izquierdo: Metadatos y textos */}
-                  <div className="flex-1 space-y-4">
-                    <div className="flex items-center gap-3">
-                      <span className="font-anton text-5xl md:text-6xl text-white/20">{stg.step}</span>
-                      <span className={`px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs font-mono ${stg.color}`}>
-                        {stg.subtitle}
-                      </span>
-                    </div>
-
-                    <h3 className="font-anton text-5xl md:text-7xl text-white tracking-tight leading-none">
-                      {stg.title}
-                    </h3>
-
-                    <p className="font-inter text-zinc-300 text-base md:text-lg font-light leading-relaxed max-w-lg">
-                      {stg.desc}
-                    </p>
-                  </div>
-
-                  {/* Lado derecho: Representación tridimensional activa */}
-                  <div className="relative w-48 h-48 md:w-64 md:h-64 flex items-center justify-center">
-                    {/* Anillos interactivos */}
-                    <div className="absolute inset-0 rounded-full border border-dashed border-white/20 animate-spin-slow"></div>
-                    <div className={`w-32 h-32 md:w-40 md:h-40 rounded-2xl bg-gradient-to-tr ${stg.gradient} p-0.5 shadow-2xl shadow-black/80 flex items-center justify-center transform hover:rotate-6 transition-transform duration-500`}>
-                      <div className="w-full h-full bg-black/90 rounded-[14px] flex flex-col items-center justify-center p-4 text-center">
-                        <Icon className={`w-12 h-12 md:w-16 md:h-16 ${stg.color} mb-2`} />
-                        <span className="font-mono text-xs text-zinc-400 uppercase tracking-widest">{stg.id}</span>
-                      </div>
-                    </div>
-                  </div>
+          <div className="relative min-h-[430px] md:min-h-[470px] rounded-[2rem] border border-white/10 bg-white/[0.025] overflow-hidden shadow-2xl">
+            <div className="absolute inset-0 opacity-25 transition-colors duration-700" style={{ background: `radial-gradient(circle at 72% 45%, ${active.glow}55, transparent 42%)` }} />
+            <div className="relative z-10 grid md:grid-cols-[1.25fr_.75fr] gap-8 h-full min-h-[430px] md:min-h-[470px] items-center p-8 md:p-14">
+              <div key={`text-${activeIndex}`} className="animate-stageIn">
+                <div className="flex flex-wrap items-center gap-3 mb-5">
+                  <span className="font-anton text-6xl md:text-7xl text-white/15 leading-none">{active.step}</span>
+                  <span className={`px-4 py-2 rounded-full bg-white/5 border border-white/10 text-xs font-mono ${active.color}`}>{active.subtitle}</span>
                 </div>
-              );
-            })}
+                <h3 className="font-anton text-6xl md:text-8xl tracking-tight leading-none mb-5">{active.title}</h3>
+                <p className="text-zinc-300 text-lg md:text-xl leading-relaxed max-w-2xl">{active.desc}</p>
+              </div>
+
+              <div key={`visual-${activeIndex}`} className="relative flex justify-center items-center animate-stageIn">
+                <div className="absolute w-64 h-64 md:w-80 md:h-80 rounded-full border border-dashed border-white/15 animate-spin-slow" />
+                <div className="absolute w-52 h-52 md:w-64 md:h-64 rounded-full border border-white/10" />
+                <div className="relative w-44 h-44 md:w-56 md:h-56 rounded-[2rem] bg-black/75 border border-white/10 backdrop-blur-xl shadow-2xl flex flex-col items-center justify-center">
+                  <ActiveIcon className={`w-16 h-16 md:w-20 md:h-20 ${active.color} mb-4`} />
+                  <span className="font-mono text-[11px] tracking-[0.3em] text-zinc-500">ETAPA {active.step}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-4 gap-2 md:gap-4 mt-7">
+            {stages.map((stage, idx) => (
+              <button key={stage.step} onClick={() => setActiveIndex(idx)} className={`text-left transition-opacity ${idx === activeIndex ? 'opacity-100' : 'opacity-35 hover:opacity-70'}`}>
+                <div className="flex items-center gap-2 mb-2"><span className="font-mono text-xs text-blue-400">{stage.step}</span><span className="font-anton text-xs sm:text-sm md:text-base truncate">{stage.title}</span></div>
+                <div className={`h-1 rounded-full ${idx === activeIndex ? 'bg-blue-500' : 'bg-white/10'}`} />
+              </button>
+            ))}
           </div>
         </div>
-
-        {/* Línea de navegación inferior con indicador de paso */}
-        <div className="max-w-7xl mx-auto w-full grid grid-cols-4 gap-2 border-t border-white/10 pt-6 z-20">
-          {stages.map((stg, idx) => {
-            const isActive = idx === activeStageIndex;
-            return (
-              <div 
-                key={stg.id}
-                className={`transition-all duration-300 ${isActive ? 'opacity-100' : 'opacity-30'}`}
-              >
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="font-mono text-xs text-blue-400">{stg.step}</span>
-                  <span className="font-anton text-sm hidden md:inline text-white">{stg.title}</span>
-                </div>
-                <div className={`h-1 w-full rounded-full transition-all duration-300 ${isActive ? 'bg-blue-500' : 'bg-white/10'}`} />
-              </div>
-            );
-          })}
-        </div>
-
       </div>
     </section>
   );
@@ -781,103 +706,76 @@ const FilamentCarousel = () => {
 
 const PrintPossibilities = () => {
   const sectionRef = useRef(null);
-  const [scrollProgress, setScrollProgress] = useState(0);
+  const [activeIndex, setActiveIndex] = useState(0);
+
+  const categories = [
+    { title: 'Figuras', label: 'Figuras y coleccionables', img: assets.categories.figures },
+    { title: 'Prototipos', label: 'Ideas que necesitan validarse', img: assets.categories.prototypes },
+    { title: 'Repuestos', label: 'Soluciones hechas a medida', img: assets.categories.spareParts },
+    { title: 'Decoración', label: 'Piezas para transformar espacios', img: assets.categories.decor },
+    { title: 'Accesorios', label: 'Objetos útiles para el día a día', img: assets.categories.accessories },
+    { title: 'Piezas funcionales', label: 'Diseño pensado para resolver', img: assets.categories.functional },
+    { title: 'Personalizados', label: 'Detalles únicos para regalar', img: assets.categories.custom },
+    { title: 'Diferentes tamaños', label: 'De pequeños detalles a grandes ideas', img: assets.categories.sizes },
+  ];
 
   useEffect(() => {
-    const handleScroll = () => {
+    const update = () => {
       if (!sectionRef.current) return;
       const rect = sectionRef.current.getBoundingClientRect();
-      const pct = Math.min(Math.max(0, -rect.top / (rect.height - window.innerHeight)), 1);
-      setScrollProgress(pct);
+      const travel = Math.max(1, rect.height - window.innerHeight);
+      const progress = Math.min(1, Math.max(0, -rect.top / travel));
+      setActiveIndex(Math.min(categories.length - 1, Math.floor(progress * categories.length)));
     };
-
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
+    update();
+    window.addEventListener('scroll', update, { passive: true });
+    return () => window.removeEventListener('scroll', update);
   }, []);
 
-  const row1 = [
-    { title: 'Figuras', img: assets.categories.figures },
-    { title: 'Prototipos', img: assets.categories.prototypes },
-    { title: 'Repuestos', img: assets.categories.spareParts },
-    { title: 'Decoración', img: assets.categories.decor },
-  ];
-
-  const row2 = [
-    { title: 'Accesorios', img: assets.categories.accessories },
-    { title: 'Piezas Funcionales', img: assets.categories.functional },
-    { title: 'Personalizados', img: assets.categories.custom },
-    { title: 'Diferentes Tamaños', img: assets.categories.sizes },
-  ];
+  const active = categories[activeIndex];
 
   return (
-    <section ref={sectionRef} id="categorias" className="relative h-[220vh] bg-black text-white">
-      <div className="sticky top-0 h-screen w-full flex flex-col justify-center overflow-hidden py-12">
-        <div className="max-w-7xl mx-auto px-6 mb-8 text-center z-10">
-          <span className="text-xs font-mono text-purple-400 tracking-widest uppercase mb-2 block">
-            Catálogo de Capacidades
-          </span>
-          <h2 className="font-anton text-5xl md:text-8xl text-white tracking-tight">
-            ¿QUÉ PODEMOS IMPRIMIR?
-          </h2>
-        </div>
+    <section ref={sectionRef} id="categorias" className="relative h-[185vh] md:h-[195vh] bg-black text-white">
+      <div className="sticky top-0 min-h-[100svh] flex items-center overflow-hidden px-6 py-24 md:py-20">
+        <div className="max-w-7xl mx-auto w-full">
+          <div className="grid lg:grid-cols-[.72fr_1.28fr] gap-8 lg:gap-12 items-center">
+            <div className="order-2 lg:order-1">
+              <span className="text-xs font-mono text-purple-400 tracking-[0.22em] uppercase block mb-3">Posibilidades casi ilimitadas</span>
+              <h2 className="font-anton text-5xl md:text-7xl xl:text-8xl leading-[.92] mb-5">¿QUÉ PODEMOS IMPRIMIR?</h2>
+              <p className="text-zinc-400 text-base md:text-lg max-w-lg mb-8">Explora diferentes tipos de proyectos. Mientras avanzas, cada categoría toma el protagonismo.</p>
 
-        {/* FILA 1: Se desplaza de Izquierda a Derecha */}
-        <div className="w-full overflow-hidden mb-6">
-          <div
-            className="flex gap-6 transition-transform duration-100 ease-linear"
-            style={{
-              transform: `translate3d(${(scrollProgress * 25 - 15)}%, 0, 0)`,
-            }}
-          >
-            {row1.concat(row1).map((cat, idx) => (
-              <div
-                key={idx}
-                className="flex-none w-72 sm:w-80 md:w-96 rounded-3xl overflow-hidden bg-zinc-900 border border-white/10 group shadow-2xl relative"
-              >
-                <div className="h-64 md:h-80 overflow-hidden relative">
-                  <ImageWithFallback
-                    src={cat.img}
-                    alt={cat.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent"></div>
-                  <div className="absolute bottom-6 left-6 right-6">
-                    <h3 className="font-anton text-3xl text-white tracking-wide">{cat.title}</h3>
-                    <p className="text-xs font-mono text-blue-400 mt-1">Acabado de alta resolución</p>
+              <div className="hidden lg:flex flex-col gap-2">
+                {categories.map((cat, idx) => (
+                  <button key={cat.title} onClick={() => setActiveIndex(idx)} className={`group flex items-center gap-4 py-3 border-b text-left transition-all ${idx === activeIndex ? 'border-blue-500 text-white' : 'border-white/10 text-zinc-600 hover:text-zinc-300'}`}>
+                    <span className="font-mono text-xs text-blue-400">0{idx + 1}</span>
+                    <span className={`font-anton text-2xl xl:text-3xl transition-transform ${idx === activeIndex ? 'translate-x-2' : ''}`}>{cat.title}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="order-1 lg:order-2">
+              <div className="relative aspect-[16/10] rounded-[2rem] overflow-hidden border border-white/10 shadow-2xl bg-zinc-950">
+                {categories.map((cat, idx) => (
+                  <div key={cat.title} className="absolute inset-0 transition-all duration-700 ease-out" style={{ opacity: idx === activeIndex ? 1 : 0, transform: idx === activeIndex ? 'scale(1)' : idx < activeIndex ? 'scale(.96) translateX(-3%)' : 'scale(1.04) translateX(3%)', filter: idx === activeIndex ? 'blur(0px)' : 'blur(8px)' }}>
+                    <ImageWithFallback src={cat.img} alt={cat.title} className="w-full h-full object-cover" />
                   </div>
+                ))}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/5 to-black/15" />
+                <div className="absolute left-6 right-6 bottom-6 md:left-9 md:right-9 md:bottom-9 flex items-end justify-between gap-5">
+                  <div key={`caption-${activeIndex}`} className="animate-stageIn">
+                    <span className="font-mono text-xs text-blue-400 tracking-widest">0{activeIndex + 1} / 08</span>
+                    <h3 className="font-anton text-4xl md:text-6xl mt-1">{active.title}</h3>
+                    <p className="text-zinc-300 text-sm md:text-base mt-1">{active.label}</p>
+                  </div>
+                  <div className="hidden sm:flex gap-1.5">{categories.map((_, idx) => <span key={idx} className={`h-1 rounded-full transition-all ${idx === activeIndex ? 'w-8 bg-blue-500' : 'w-3 bg-white/20'}`} />)}</div>
                 </div>
               </div>
-            ))}
-          </div>
-        </div>
 
-        {/* FILA 2: Se desplaza de Derecha a Izquierda */}
-        <div className="w-full overflow-hidden">
-          <div
-            className="flex gap-6 transition-transform duration-100 ease-linear"
-            style={{
-              transform: `translate3d(${(-scrollProgress * 25 + 5)}%, 0, 0)`,
-            }}
-          >
-            {row2.concat(row2).map((cat, idx) => (
-              <div
-                key={idx}
-                className="flex-none w-72 sm:w-80 md:w-96 rounded-3xl overflow-hidden bg-zinc-900 border border-white/10 group shadow-2xl relative"
-              >
-                <div className="h-64 md:h-80 overflow-hidden relative">
-                  <ImageWithFallback
-                    src={cat.img}
-                    alt={cat.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent"></div>
-                  <div className="absolute bottom-6 left-6 right-6">
-                    <h3 className="font-anton text-3xl text-white tracking-wide">{cat.title}</h3>
-                    <p className="text-xs font-mono text-purple-400 mt-1">Diseño + Impresión 3D</p>
-                  </div>
-                </div>
+              <div className="lg:hidden flex gap-2 overflow-x-auto pt-5 pb-1 scrollbar-none">
+                {categories.map((cat, idx) => <button key={cat.title} onClick={() => setActiveIndex(idx)} className={`flex-none px-4 py-2 rounded-full border text-sm ${idx === activeIndex ? 'bg-blue-600 border-blue-500 text-white' : 'bg-white/5 border-white/10 text-zinc-400'}`}>{cat.title}</button>)}
               </div>
-            ))}
+            </div>
           </div>
         </div>
       </div>
@@ -973,44 +871,23 @@ const WorkShowcase = () => {
 
 const FinalCTA = () => {
   return (
-    <section className="relative min-h-[90vh] py-24 px-6 flex items-center justify-center overflow-hidden bg-black text-white">
-      {/* Imagen Principal de Fondo de Alta Calidad */}
+    <section className="relative min-h-[68vh] md:min-h-[72vh] py-20 px-6 flex items-center justify-center overflow-hidden bg-black text-white">
       <ImageWithFallback
         src={assets.finalCta}
-        alt="Tu idea puede ser la próxima"
-        className="absolute inset-0 w-full h-full object-cover opacity-45 transform scale-105 hover:scale-100 transition-transform duration-1000"
+        alt="Taller de impresión 3D"
+        className="absolute inset-0 w-full h-full object-cover"
       />
-      <div className="absolute inset-0 bg-gradient-to-t from-black via-black/80 to-black/60"></div>
+      <div className="absolute inset-0 bg-gradient-to-r from-black/78 via-black/35 to-black/45" />
+      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/25" />
 
-      <div className="relative z-10 max-w-4xl mx-auto text-center flex flex-col items-center">
-        {/* Chips Informativos */}
-        <div className="flex flex-wrap justify-center gap-3 mb-8">
-          {['Impresión 3D personalizada', 'ELEGOO · SUNLU', 'PLA · PLA+ · PETG · TPU'].map((item, idx) => (
-            <span
-              key={idx}
-              className="px-4 py-2 rounded-full bg-white/10 border border-white/15 text-xs font-mono text-zinc-200 backdrop-blur-md"
-            >
-              {item}
-            </span>
-          ))}
-        </div>
-
-        <h2 className="font-anton text-6xl md:text-9xl text-white tracking-tight leading-none mb-6">
-          TU IDEA PUEDE SER <span className="bg-gradient-to-r from-emerald-400 via-blue-400 to-purple-400 bg-clip-text text-transparent">LA PRÓXIMA</span>
-        </h2>
-
-        <p className="font-inter text-lg sm:text-2xl text-zinc-300 max-w-2xl mx-auto mb-10 font-light leading-relaxed">
-          Cuéntanos qué necesitas y recibe una cotización para convertirlo en una pieza real.
-        </p>
-
-        <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer">
-          <Button variant="primary" icon={ArrowRight} className="!px-12 !py-5 !text-lg !bg-emerald-500 hover:!bg-white hover:!text-black shadow-2xl shadow-emerald-500/30">
-            COTIZAR POR WHATSAPP
-          </Button>
-        </a>
-
-        <div className="mt-14 text-xs font-mono text-zinc-500 tracking-widest uppercase">
-          Imaginamos · Diseñamos · Imprimimos · Hacemos posible
+      <div className="relative z-10 max-w-7xl mx-auto w-full">
+        <div className="max-w-3xl rounded-[2rem] bg-black/30 border border-white/10 backdrop-blur-sm p-7 md:p-10">
+          <span className="text-xs font-mono text-blue-300 tracking-[0.22em] uppercase block mb-4">Tu siguiente proyecto puede empezar aquí</span>
+          <h2 className="font-anton text-5xl sm:text-6xl md:text-7xl xl:text-8xl tracking-tight leading-[0.92] mb-5">TU PROYECTO<br/><span className="bg-gradient-to-r from-blue-400 via-violet-400 to-emerald-300 bg-clip-text text-transparent">A UN PASO</span></h2>
+          <p className="font-inter text-lg md:text-xl text-zinc-200 max-w-2xl mb-8 font-light leading-relaxed">Cuéntanos qué necesitas y recibe una cotización personalizada para convertir tu idea en una pieza real.</p>
+          <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer">
+            <Button variant="primary" icon={ArrowRight} className="!px-8 md:!px-10 !py-4 !text-base !bg-emerald-500 hover:!bg-white hover:!text-black shadow-xl shadow-emerald-500/20">COTIZAR POR WHATSAPP</Button>
+          </a>
         </div>
       </div>
     </section>
@@ -1059,6 +936,18 @@ export default function App() {
         .animate-fadeIn {
           animation: fadeIn 0.3s ease-out forwards;
         }
+
+        @keyframes stageIn {
+          from { opacity: 0; transform: translateY(18px) scale(0.985); filter: blur(5px); }
+          to { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+        }
+
+        .animate-stageIn {
+          animation: stageIn 0.55s cubic-bezier(0.2,0.7,0.2,1) both;
+        }
+
+        .scrollbar-none::-webkit-scrollbar { display: none; }
+        .scrollbar-none { scrollbar-width: none; }
 
         @keyframes spin-slow {
           from { transform: rotate(0deg); }
