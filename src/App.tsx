@@ -427,10 +427,66 @@ const CinematicHero = () => {
 // 2 — PROCESO NARRATIVO PROGRESSIVO
 // ==========================================
 
+const useImmersiveWheelSteps = (sectionRef, totalSteps, activeIndex, setActiveIndex, threshold = 85) => {
+  const activeRef = useRef(activeIndex);
+  const accumulatorRef = useRef(0);
+  const lastActionRef = useRef(0);
+
+  useEffect(() => {
+    activeRef.current = activeIndex;
+  }, [activeIndex]);
+
+  useEffect(() => {
+    const handleWheel = (event) => {
+      if (window.innerWidth < 1024 || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+      const section = sectionRef.current;
+      if (!section) return;
+
+      const rect = section.getBoundingClientRect();
+      // Lock only while this 100vh scene is aligned with the viewport.
+      const isStoryActive = rect.top <= 90 && rect.top >= -90 && rect.bottom >= window.innerHeight - 90;
+      if (!isStoryActive) {
+        accumulatorRef.current = 0;
+        return;
+      }
+
+      const direction = Math.sign(event.deltaY);
+      if (!direction) return;
+      const current = activeRef.current;
+      const leavingForward = direction > 0 && current >= totalSteps - 1;
+      const leavingBackward = direction < 0 && current <= 0;
+
+      // Once the first/last step has been reached, the next wheel gesture releases the page.
+      if (leavingForward || leavingBackward) {
+        accumulatorRef.current = 0;
+        return;
+      }
+
+      event.preventDefault();
+      accumulatorRef.current += event.deltaY;
+      if (Math.abs(accumulatorRef.current) < threshold) return;
+
+      const now = performance.now();
+      if (now - lastActionRef.current < 430) {
+        accumulatorRef.current = 0;
+        return;
+      }
+
+      const next = Math.max(0, Math.min(totalSteps - 1, current + (accumulatorRef.current > 0 ? 1 : -1)));
+      activeRef.current = next;
+      setActiveIndex(next);
+      lastActionRef.current = now;
+      accumulatorRef.current = 0;
+    };
+
+    window.addEventListener('wheel', handleWheel, { passive: false });
+    return () => window.removeEventListener('wheel', handleWheel);
+  }, [sectionRef, totalSteps, setActiveIndex, threshold]);
+};
+
 const ProcessSection = () => {
   const sectionRef = useRef(null);
   const [activeIndex, setActiveIndex] = useState(0);
-  const [sectionProgress, setSectionProgress] = useState(0);
 
   const stages = [
     {
@@ -471,45 +527,27 @@ const ProcessSection = () => {
     },
   ];
 
-  useEffect(() => {
-    const update = () => {
-      const section = sectionRef.current;
-      if (!section) return;
-      const rect = section.getBoundingClientRect();
-      const travel = Math.max(1, section.offsetHeight - window.innerHeight);
-      const raw = Math.min(1, Math.max(0, -rect.top / travel));
-      setSectionProgress(raw);
-      setActiveIndex(Math.min(stages.length - 1, Math.floor(raw * stages.length)));
-    };
-    update();
-    window.addEventListener('scroll', update, { passive: true });
-    window.addEventListener('resize', update);
-    return () => {
-      window.removeEventListener('scroll', update);
-      window.removeEventListener('resize', update);
-    };
-  }, []);
+  useImmersiveWheelSteps(sectionRef, stages.length, activeIndex, setActiveIndex, 80);
 
   const active = stages[activeIndex];
-  const ActiveIcon = active.icon;
-  const localProgress = Math.min(1, Math.max(0, sectionProgress * stages.length - activeIndex));
+  const progress = activeIndex / (stages.length - 1);
 
   return (
-    <section ref={sectionRef} id="proceso" className="relative h-[300vh] md:h-[320vh] bg-[#050508] text-white">
-      <div className="sticky top-0 h-[100svh] overflow-hidden px-5 md:px-8 pt-28 pb-5 md:pt-28 md:pb-6 flex items-center">
+    <section ref={sectionRef} id="proceso" className="relative min-h-[100svh] lg:h-[100svh] bg-[#050508] text-white overflow-hidden">
+      <div className="h-full px-5 md:px-8 pt-24 md:pt-24 pb-5 flex items-center">
         <div className="max-w-7xl mx-auto w-full">
-          <div className="flex items-end justify-between gap-6 border-b border-white/10 pb-4 mb-5">
+          <div className="flex items-end justify-between gap-6 border-b border-white/10 pb-3 mb-4">
             <div>
               <span className="text-[10px] md:text-xs font-mono text-blue-400 tracking-[0.22em] uppercase block mb-1.5">Transformación progresiva</span>
-              <h2 className="font-anton text-3xl md:text-5xl xl:text-6xl tracking-tight leading-[0.94]">DE UNA IDEA A UNA PIEZA REAL</h2>
+              <h2 className="font-anton text-3xl md:text-5xl xl:text-[3.35rem] tracking-tight leading-[0.94]">DE UNA IDEA A UNA PIEZA REAL</h2>
             </div>
             <div className="hidden md:block w-56">
-              <div className="flex justify-between text-[10px] font-mono text-zinc-500 mb-2"><span>RECORRIDO</span><span>{Math.round(sectionProgress * 100)}%</span></div>
-              <div className="h-1.5 bg-white/10 rounded-full overflow-hidden"><div className="h-full bg-gradient-to-r from-blue-500 via-violet-500 to-emerald-400" style={{ width: `${sectionProgress * 100}%` }} /></div>
+              <div className="flex justify-between text-[10px] font-mono text-zinc-500 mb-2"><span>RECORRIDO</span><span>{Math.round(progress * 100)}%</span></div>
+              <div className="h-1.5 bg-white/10 rounded-full overflow-hidden"><div className="h-full bg-gradient-to-r from-blue-500 via-violet-500 to-emerald-400 transition-all duration-500" style={{ width: `${progress * 100}%` }} /></div>
             </div>
           </div>
 
-          <div className="relative h-[57vh] min-h-[390px] max-h-[545px] rounded-[2rem] border border-white/10 bg-white/[0.025] overflow-hidden shadow-2xl">
+          <div className="relative h-[58vh] min-h-[380px] max-h-[530px] rounded-[2rem] border border-white/10 bg-white/[0.025] overflow-hidden shadow-2xl">
             <div className="absolute inset-0 transition-all duration-700" style={{ background: `radial-gradient(circle at 74% 48%, ${active.glow}35, transparent 42%)` }} />
             <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
 
@@ -523,8 +561,8 @@ const ProcessSection = () => {
                   className="absolute inset-0 grid md:grid-cols-[1.2fr_.8fr] gap-8 items-center p-7 md:p-10 lg:p-12 transition-all duration-700 ease-[cubic-bezier(.22,1,.36,1)]"
                   style={{
                     opacity: isActive ? 1 : 0,
-                    transform: isActive ? `translate3d(0, ${(0.5-localProgress)*8}px, 0) scale(1)` : isPast ? 'translate3d(-7%,0,0) scale(.94)' : 'translate3d(7%,0,0) scale(1.04)',
-                    filter: isActive ? 'blur(0px)' : 'blur(10px)',
+                    transform: isActive ? 'translate3d(0,0,0) scale(1)' : isPast ? 'translate3d(-8%,0,0) scale(.94)' : 'translate3d(8%,0,0) scale(1.04)',
+                    filter: isActive ? 'blur(0px)' : 'blur(12px)',
                     pointerEvents: isActive ? 'auto' : 'none',
                   }}
                 >
@@ -550,7 +588,7 @@ const ProcessSection = () => {
             })}
           </div>
 
-          <div className="grid grid-cols-4 gap-2 md:gap-4 mt-5">
+          <div className="grid grid-cols-4 gap-2 md:gap-4 mt-4">
             {stages.map((stage, idx) => {
               const completed = idx < activeIndex;
               const current = idx === activeIndex;
@@ -558,12 +596,13 @@ const ProcessSection = () => {
                 <div key={stage.step} className={`transition-opacity ${current ? 'opacity-100' : completed ? 'opacity-55' : 'opacity-28'}`}>
                   <div className="flex items-center gap-2 mb-1.5"><span className="font-mono text-[10px] md:text-xs text-blue-400">{stage.step}</span><span className="font-anton text-[10px] sm:text-xs md:text-sm truncate">{stage.title}</span></div>
                   <div className="h-1 rounded-full bg-white/10 overflow-hidden">
-                    <div className={`h-full ${completed ? 'w-full bg-blue-500/70' : current ? 'bg-blue-500' : 'w-0'}`} style={current ? { width: `${Math.max(12, localProgress * 100)}%` } : undefined} />
+                    <div className={`h-full transition-all duration-500 ${completed || current ? 'w-full bg-blue-500' : 'w-0'}`} />
                   </div>
                 </div>
               );
             })}
           </div>
+          <p className="hidden lg:block text-center text-[10px] font-mono tracking-[0.18em] text-zinc-600 mt-3">DESPLAZA PARA AVANZAR · AL TERMINAR, LA PÁGINA CONTINÚA</p>
         </div>
       </div>
     </section>
@@ -733,7 +772,6 @@ const FilamentCarousel = () => {
 const PrintPossibilities = () => {
   const sectionRef = useRef(null);
   const [activeIndex, setActiveIndex] = useState(0);
-  const [sectionProgress, setSectionProgress] = useState(0);
 
   const categories = [
     { title: 'Figuras', label: 'Figuras y coleccionables', img: assets.categories.figures },
@@ -746,48 +784,30 @@ const PrintPossibilities = () => {
     { title: 'Diferentes tamaños', label: 'De pequeños detalles a grandes ideas', img: assets.categories.sizes },
   ];
 
-  useEffect(() => {
-    const update = () => {
-      const section = sectionRef.current;
-      if (!section) return;
-      const rect = section.getBoundingClientRect();
-      const travel = Math.max(1, section.offsetHeight - window.innerHeight);
-      const raw = Math.min(1, Math.max(0, -rect.top / travel));
-      setSectionProgress(raw);
-      setActiveIndex(Math.min(categories.length - 1, Math.floor(raw * categories.length)));
-    };
-    update();
-    window.addEventListener('scroll', update, { passive: true });
-    window.addEventListener('resize', update);
-    return () => {
-      window.removeEventListener('scroll', update);
-      window.removeEventListener('resize', update);
-    };
-  }, []);
-
+  useImmersiveWheelSteps(sectionRef, categories.length, activeIndex, setActiveIndex, 70);
   const active = categories[activeIndex];
-  const localProgress = Math.min(1, Math.max(0, sectionProgress * categories.length - activeIndex));
+  const progress = (activeIndex + 1) / categories.length;
 
   return (
-    <section ref={sectionRef} id="categorias" className="relative h-[390vh] md:h-[420vh] bg-black text-white">
-      <div className="sticky top-0 h-[100svh] overflow-hidden px-5 md:px-8 pt-28 pb-6 flex items-center">
+    <section ref={sectionRef} id="categorias" className="relative min-h-[100svh] lg:h-[100svh] bg-black text-white overflow-hidden">
+      <div className="h-full px-5 md:px-8 pt-24 md:pt-24 pb-5 flex items-center">
         <div className="max-w-7xl mx-auto w-full">
-          <div className="grid lg:grid-cols-[.70fr_1.30fr] gap-7 lg:gap-10 items-center">
+          <div className="grid lg:grid-cols-[.68fr_1.32fr] gap-7 lg:gap-10 items-center">
             <div className="order-2 lg:order-1">
               <span className="text-[10px] md:text-xs font-mono text-purple-400 tracking-[0.22em] uppercase block mb-2">Posibilidades casi ilimitadas</span>
-              <h2 className="font-anton text-3xl md:text-5xl xl:text-6xl leading-[.92] mb-3">¿QUÉ PODEMOS IMPRIMIR?</h2>
-              <p className="text-zinc-400 text-sm md:text-base max-w-lg mb-5">El recorrido queda fijo mientras cada categoría toma el protagonismo.</p>
+              <h2 className="font-anton text-3xl md:text-5xl xl:text-[3.35rem] leading-[.92] mb-3">¿QUÉ PODEMOS IMPRIMIR?</h2>
+              <p className="text-zinc-400 text-sm md:text-base max-w-lg mb-4">Aquí el scroll no baja la página: cambia la categoría protagonista. Al llegar a la octava, el recorrido continúa.</p>
 
               <div className="hidden lg:flex flex-col">
                 {categories.map((cat, idx) => {
                   const current = idx === activeIndex;
                   const completed = idx < activeIndex;
                   return (
-                    <div key={cat.title} className={`relative flex items-center gap-4 py-2.5 border-b transition-all duration-500 ${current ? 'border-blue-500 text-white' : 'border-white/10 text-zinc-600'}`}>
+                    <div key={cat.title} className={`relative flex items-center gap-4 py-2 border-b transition-all duration-500 ${current ? 'border-blue-500 text-white' : 'border-white/10 text-zinc-600'}`}>
                       <span className="font-mono text-[11px] text-blue-400">0{idx + 1}</span>
-                      <span className={`font-anton text-xl xl:text-2xl transition-all duration-500 ${current ? 'translate-x-2 scale-[1.04]' : ''}`}>{cat.title}</span>
-                      {current && <span className="ml-auto text-[10px] font-mono text-zinc-500">{Math.round(localProgress * 100)}%</span>}
-                      <span className={`absolute left-0 bottom-[-1px] h-[2px] bg-blue-500 transition-all ${completed ? 'w-full opacity-35' : current ? '' : 'w-0'}`} style={current ? { width: `${Math.max(8, localProgress * 100)}%` } : undefined} />
+                      <span className={`font-anton text-lg xl:text-[1.35rem] transition-all duration-500 ${current ? 'translate-x-2 scale-[1.04]' : ''}`}>{cat.title}</span>
+                      {current && <span className="ml-auto text-[10px] font-mono text-zinc-500">{Math.round(progress * 100)}%</span>}
+                      <span className={`absolute left-0 bottom-[-1px] h-[2px] bg-blue-500 transition-all duration-500 ${completed || current ? 'w-full' : 'w-0'} ${completed ? 'opacity-30' : ''}`} />
                     </div>
                   );
                 })}
@@ -795,7 +815,7 @@ const PrintPossibilities = () => {
             </div>
 
             <div className="order-1 lg:order-2">
-              <div className="relative h-[64vh] min-h-[450px] max-h-[620px] rounded-[2rem] overflow-hidden border border-white/10 shadow-2xl bg-zinc-950">
+              <div className="relative h-[62vh] min-h-[430px] max-h-[590px] rounded-[2rem] overflow-hidden border border-white/10 shadow-2xl bg-zinc-950">
                 {categories.map((cat, idx) => {
                   const current = idx === activeIndex;
                   const past = idx < activeIndex;
@@ -805,8 +825,8 @@ const PrintPossibilities = () => {
                       className="absolute inset-0 transition-all duration-700 ease-[cubic-bezier(.22,1,.36,1)]"
                       style={{
                         opacity: current ? 1 : 0,
-                        transform: current ? `translate3d(0, ${(0.5-localProgress)*12}px, 0) scale(1)` : past ? 'translate3d(0,-7%,0) scale(.965)' : 'translate3d(0,7%,0) scale(1.035)',
-                        filter: current ? 'blur(0px)' : 'blur(10px)',
+                        transform: current ? 'translate3d(0,0,0) scale(1)' : past ? 'translate3d(0,-10%,0) scale(.96)' : 'translate3d(0,10%,0) scale(1.04)',
+                        filter: current ? 'blur(0px)' : 'blur(14px)',
                       }}
                     >
                       <ImageWithFallback src={cat.img} alt={cat.title} className="w-full h-full object-cover" />
@@ -829,6 +849,7 @@ const PrintPossibilities = () => {
               </div>
             </div>
           </div>
+          <p className="hidden lg:block text-center text-[10px] font-mono tracking-[0.18em] text-zinc-600 mt-3">DESPLAZA PARA CAMBIAR CATEGORÍA · DESPUÉS DE 08, CONTINÚA A TRABAJOS</p>
         </div>
       </div>
     </section>
